@@ -10,7 +10,7 @@ class WordsToPdf extends Controller
 {
     public function getWord(Request $req)
     {
-        $templateFile = Storage::path('public/FastTrack.docx');
+        $templateFile = Storage::path('public/contract-ft-scopus.docx');
         $templateProcessor = new TemplateProcessor($templateFile);
 
         // Define the data to be merged from JSON
@@ -28,7 +28,7 @@ class WordsToPdf extends Controller
 
     public function createContract(Request $req)
     {
-        $templateFile = Storage::path('public/FastTrack.docx');
+        $templateFile = Storage::path('public/contract-ft-scopus.docx');
         $templateProcessor = new TemplateProcessor($templateFile);
 
         // Define the data to be merged from JSON
