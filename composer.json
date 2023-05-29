@@ -17,7 +17,9 @@
         "laravel/tinker": "^2.5",
         "mpdf/mpdf": "^8.1",
         "phpoffice/phpword": "^1.0",
-        "socialiteproviders/laravelpassport": "^4.3"
+        "phpseclib/phpseclib": "^2.0",
+        "socialiteproviders/laravelpassport": "^4.3",
+        "tecnickcom/tcpdf": "^6.6"
     },
     "require-dev": {
         "facade/ignition": "^2.0",

@@ -19,3 +19,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('createcontract', 'WordsToPdf@createContract');
+
+Route::post('sign', 'WordsToPdf@sign');
+
+Route::post('testloop', 'WordsToPdf@testLoop');
