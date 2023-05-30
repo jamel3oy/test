@@ -23,3 +23,4 @@ Route::post('createcontract', 'WordsToPdf@createContract');
 Route::post('sign', 'WordsToPdf@sign');
 
 Route::post('testloop', 'WordsToPdf@testLoop');
+Route::post('signx', 'SignPdf@sign');
