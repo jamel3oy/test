@@ -32,26 +32,21 @@ class WordsToPdf extends Controller
 
     public function testLoop(Request $req)
     {
+        //return $req;
         $templateFile = Storage::path('public/docx-template.docx');
         $templateProcessor = new TemplateProcessor($templateFile);
-
-        // Define the data to be merged from JSON
-        $data = array(
-            'auther_name' => 'อัครรินทร์ บุปผา'
-        );
-
+        $facName = explode(" : ",$req->facultyname);
         // Replace the MERGEFIELD field with the actual data from JSON
-        $templateProcessor->setValue('FacultyName', $data['auther_name']);
+        $templateProcessor->setValue('FacultyName', count($facName)>1?$facName[1]:"No_data.");
 
-        $jsonData = Storage::get('public/report.json');
-
-        $jsonData = json_decode($jsonData);
+        $jsonData = $req->all_data;
         
         $ar = array();
         $aim = array();
         $kpi = array();
         $proj = array();
         foreach ($jsonData as $key => $val) {
+            $val = (object)$val;
             $a = [
                 "block_stg"=>"",
                 "stgname"=>"\${stgname_".$key."}",
@@ -106,9 +101,9 @@ class WordsToPdf extends Controller
                     "sumexp4_".$key=>"\${sumexp4_".$key."_".$k."}",
                     "sumexp5_".$key=>"\${sumexp5_".$key."_".$k."}",
                     "sumall_".$key=>"\${sumall_".$key."_".$k."}",
-                    "indname_".$key=>"indname_".$key."_".$k."",
-                    "indunit_".$key=>"indunit_".$key."_".$k."",
-                    "indgoal_".$key=>"indgoal_".$key."_".$k.""
+                    "indname_".$key=>"\${indname_".$key."_".$k."}",
+                    "indunit_".$key=>"\${indunit_".$key."_".$k."}",
+                    "indgoal_".$key=>"\${indgoal_".$key."_".$k."}"
                 ];
                 array_push($proj[$key],$ax);
             }
@@ -119,41 +114,23 @@ class WordsToPdf extends Controller
         $templateProcessor->cloneBlock('block_stg', count($ar), true, false, $ar);
         
         foreach ($jsonData as $key => $val) {
+            $val = (object)$val;
             $templateProcessor->setValue("stgname_".$key, $val->STRATEGICCODE." ".$val->STRATEGICNAME);
             $templateProcessor->cloneBlock("block_aim_".$key, count($aim[$key]), true, false, $aim[$key]);
             foreach ($aim[$key] as $ka => $va) {
-                var_dump($va["aimname_".$key]);
-                var_dump($val->AIMS[$ka]->AIM_NAME);
+                $val->AIMS[$ka] = (object)$val->AIMS[$ka];
                 $templateProcessor->setValue($va["aimname_".$key], $val->AIMS[$ka]->AIM_NAME);
             }
 
             $templateProcessor->cloneBlock("block_kpi_".$key, count($kpi[$key]), true, false, $kpi[$key]);
             foreach ($kpi[$key] as $ka => $va) {
-                var_dump($va["kpiname_".$key]);
-                var_dump($val->INDS[$ka]->IND_NAME);
+                $val->INDS[$ka] = (object)$val->INDS[$ka];
                 $templateProcessor->setValue($va["kpiname_".$key], $val->INDS[$ka]->IND_NAME);
             }
 
             $templateProcessor->cloneBlock("block_proj_".$key, count($proj[$key]), true, false, $proj[$key]);
             foreach ($proj[$key] as $ka => $va) {
-                var_dump($va["projname_".$key]);
-                var_dump($val->PROJS[$ka]->PROJECTWORKNAME);
-                var_dump($va["sumexp1_".$key]);
-                var_dump($val->PROJS[$ka]->SUMAMOUNTEXP1);
-                var_dump($va["sumexp2_".$key]);
-                var_dump($val->PROJS[$ka]->SUMAMOUNTEXP2);
-                var_dump($va["sumexp3_".$key]);
-                var_dump($val->PROJS[$ka]->SUMAMOUNTEXP3);
-                var_dump($va["sumexp4_".$key]);
-                var_dump($val->PROJS[$ka]->SUMAMOUNTEXP4);
-                var_dump($va["sumexp5_".$key]);
-                var_dump($val->PROJS[$ka]->SUMAMOUNTEXP5);
-                var_dump($va["sumall_".$key]);
-                var_dump($val->PROJS[$ka]->AMOUNT);
-                var_dump($va["indname_".$key]);
-                var_dump($va["indunit_".$key]);
-                var_dump($va["indgoal_".$key]);
-                var_dump($val->PROJS[$ka]->GOALKPIS);
+                $val->PROJS[$ka] = (object)$val->PROJS[$ka];
                 $templateProcessor->setValue($va["projname_".$key], $val->PROJS[$ka]->PROJECTWORKNAME);
                 $templateProcessor->setValue($va["sumexp1_".$key], number_format($val->PROJS[$ka]->SUMAMOUNTEXP1));
                 $templateProcessor->setValue($va["sumexp2_".$key], number_format($val->PROJS[$ka]->SUMAMOUNTEXP2));
@@ -162,30 +139,36 @@ class WordsToPdf extends Controller
                 $templateProcessor->setValue($va["sumexp5_".$key], number_format($val->PROJS[$ka]->SUMAMOUNTEXP5));
                 $templateProcessor->setValue($va["sumall_".$key], number_format($val->PROJS[$ka]->AMOUNT));
 
-                $data = [];
+                $datas = [];
                 foreach ($val->PROJS[$ka]->GOALKPIS as $kgp => $vkgp) {
+                    $vkgp = (object)$vkgp;
                     $szx = [ 
                         $va["indname_".$key] => $vkgp->INDNAME,
                         $va["indunit_".$key] => $vkgp->INDUNIT,
                         $va["indgoal_".$key] => $vkgp->INDGOAL
                     ];
-                    array_push($data, $szx);
+                    array_push($datas, $szx);
+
                 }
+                $templateProcessor->cloneRow($va["indname_".$key], count($val->PROJS[$ka]->GOALKPIS));
 
-                var_dump("dddddddddddddddddddddddddddddddddddddddddddddddd",$data);
-
-                foreach ($val->PROJS[$ka]->GOALKPIS as $data) {
-                    $templateProcessor->cloneRow($va["indname_".$key], $data);
+                foreach ($datas as $key_data => $data) {
+                    foreach ($data as $kd => $dt) {
+                        $key_string = substr($kd,2,strlen($kd)-3);
+                        $templateProcessor->setValue($key_string."#".($key_data+1), $dt);
+                    }
                 }
             }
-
-
         }
         
-
         // Save the merged Word document to a new file
-        // $outputFile = Storage::path('public/docx-out.docx');
-        // $templateProcessor->saveAs($outputFile);
+        $file_out_name = 'public/รายงานความเชื่อมโยงค่าเป้าหมายและKPI-'.time().'.docx';
+        $outputFile = Storage::path($file_out_name);
+        $templateProcessor->saveAs($outputFile);
+        $retcontent = Storage::get($file_out_name);
+        Storage::delete($file_out_name);
+
+        return $retcontent;
     }
 
     public function createContract(Request $req)
