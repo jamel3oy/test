@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use PhpOffice\PhpWord\TemplateProcessor;
 use Illuminate\Support\Facades\Storage;
 use setasign\Fpdi\Tcpdf\Fpdi;
@@ -42,52 +43,145 @@ class WordsToPdf extends Controller
         // Replace the MERGEFIELD field with the actual data from JSON
         $templateProcessor->setValue('FacultyName', $data['auther_name']);
 
-        $ar = array([
-            "block_stg"=>"",
-            "stgname"=>"\${stgname_b1}",
-            "kpiname"=>"\${kpiname_b1}",
-            "projname"=>"\${projname_b1}",
-            "block_aim"=>"\${block_aim_b1}",
-            "/block_aim"=>"\${/block_aim_b1}",
-            "aimname"=>"\${aimname_b1}",
-            "block_kpi"=>"\${block_kpi_b1}",
-            "/block_kpi"=>"\${/block_kpi_b1}",
-            "kpiname"=>"\${kpiname_b1}",
-            "block_proj"=>"\${block_proj_b1}",
-            "/block_proj"=>"\${/block_proj_b1}",
-        ],[
-            "block_stg"=>"",
-            "stgname"=>"\${stgname_b2}",
-            "kpiname"=>"\${kpiname_b2}",
-            "projname"=>"\${projname_b2}",
-            "block_aim"=>"\${block_aim_b2}",
-            "/block_aim"=>"\${/block_aim_b2}",
-            "aimname"=>"\${aimname_b1}",
-            "block_kpi"=>"\${block_kpi_b2}",
-            "/block_kpi"=>"\${/block_kpi_b2}",
-            "kpiname"=>"\${kpiname_b2}",
-            "block_proj"=>"\${block_proj_b2}",
-            "/block_proj"=>"\${/block_proj_b2}",
-        ]);
+        $jsonData = Storage::get('public/report.json');
 
-        $ar2 = array([
-            "block_proj_b1"=>"\${block_proj_b1_l1}",
-            "/block_proj_b1"=>"\${/block_proj_b1_l1}",
-        ],[
-            "block_proj_b1"=>"\${block_proj_b1_l2}",
-            "/block_proj_b1"=>"\${/block_proj_b1_l2}",
-        ]);
+        $jsonData = json_decode($jsonData);
+        
+        $ar = array();
+        $aim = array();
+        $kpi = array();
+        $proj = array();
+        foreach ($jsonData as $key => $val) {
+            $a = [
+                "block_stg"=>"",
+                "stgname"=>"\${stgname_".$key."}",
+                "kpiname"=>"\${kpiname_".$key."}",
+                "projname"=>"\${projname_".$key."}",
+                "sumexp1"=>"\${sumexp1_".$key."}",
+                "sumexp2"=>"\${sumexp2_".$key."}",
+                "sumexp3"=>"\${sumexp3_".$key."}",
+                "sumexp4"=>"\${sumexp4_".$key."}",
+                "sumexp5"=>"\${sumexp5_".$key."}",
+                "sumall"=>"\${sumall_".$key."}",
+                "indname"=>"\${indname_".$key."}",
+                "indunit"=>"\${indunit_".$key."}",
+                "indgoal"=>"\${indgoal_".$key."}",
+                "block_aim"=>"\${block_aim_".$key."}",
+                "/block_aim"=>"\${/block_aim_".$key."}",
+                "aimname"=>"\${aimname_".$key."}",
+                "block_kpi"=>"\${block_kpi_".$key."}",
+                "/block_kpi"=>"\${/block_kpi_".$key."}",
+                "kpiname"=>"\${kpiname_".$key."}",
+                "block_proj"=>"\${block_proj_".$key."}",
+                "/block_proj"=>"\${/block_proj_".$key."}",
+            ];
+            array_push($ar,$a);
+
+            $aim[$key] = array();
+            foreach ($val->AIMS as $k => $vx) {
+                $ax = [
+                    "block_aim_".$key=>"",
+                    "aimname_".$key=>"\${aimname_".$key."_".$k."}"
+                ];
+                array_push($aim[$key],$ax);
+            }
+
+            $kpi[$key] = array();
+            foreach ($val->INDS as $k => $vx) {
+                $ax = [
+                    "block_kpi_".$key=>"",
+                    "kpiname_".$key=>"\${kpiname_".$key."_".$k."}"
+                ];
+                array_push($kpi[$key],$ax);
+            }
+
+            $proj[$key] = array();
+            foreach ($val->PROJS as $k => $vx) {
+                $ax = [
+                    "block_proj_".$key=>"",
+                    "projname_".$key=>"\${projname_".$key."_".$k."}",
+                    "sumexp1_".$key=>"\${sumexp1_".$key."_".$k."}",
+                    "sumexp2_".$key=>"\${sumexp2_".$key."_".$k."}",
+                    "sumexp3_".$key=>"\${sumexp3_".$key."_".$k."}",
+                    "sumexp4_".$key=>"\${sumexp4_".$key."_".$k."}",
+                    "sumexp5_".$key=>"\${sumexp5_".$key."_".$k."}",
+                    "sumall_".$key=>"\${sumall_".$key."_".$k."}",
+                    "indname_".$key=>"indname_".$key."_".$k."",
+                    "indunit_".$key=>"indunit_".$key."_".$k."",
+                    "indgoal_".$key=>"indgoal_".$key."_".$k.""
+                ];
+                array_push($proj[$key],$ax);
+            }
+        } 
+
+        //return $proj;
 
         $templateProcessor->cloneBlock('block_stg', count($ar), true, false, $ar);
+        
+        foreach ($jsonData as $key => $val) {
+            $templateProcessor->setValue("stgname_".$key, $val->STRATEGICCODE." ".$val->STRATEGICNAME);
+            $templateProcessor->cloneBlock("block_aim_".$key, count($aim[$key]), true, false, $aim[$key]);
+            foreach ($aim[$key] as $ka => $va) {
+                var_dump($va["aimname_".$key]);
+                var_dump($val->AIMS[$ka]->AIM_NAME);
+                $templateProcessor->setValue($va["aimname_".$key], $val->AIMS[$ka]->AIM_NAME);
+            }
 
-        $templateProcessor->cloneBlock('block_proj_b1', count($ar2), true, false, $ar2);
-        // $i = 0;
-        // foreach ($ar as $key => $value) {
-        //     $i++;
-        //     foreach ($value as $kx => $v) {
-        //         $templateProcessor->setValue($kx.'#'.$i, $v);
-        //     }
-        // }
+            $templateProcessor->cloneBlock("block_kpi_".$key, count($kpi[$key]), true, false, $kpi[$key]);
+            foreach ($kpi[$key] as $ka => $va) {
+                var_dump($va["kpiname_".$key]);
+                var_dump($val->INDS[$ka]->IND_NAME);
+                $templateProcessor->setValue($va["kpiname_".$key], $val->INDS[$ka]->IND_NAME);
+            }
+
+            $templateProcessor->cloneBlock("block_proj_".$key, count($proj[$key]), true, false, $proj[$key]);
+            foreach ($proj[$key] as $ka => $va) {
+                var_dump($va["projname_".$key]);
+                var_dump($val->PROJS[$ka]->PROJECTWORKNAME);
+                var_dump($va["sumexp1_".$key]);
+                var_dump($val->PROJS[$ka]->SUMAMOUNTEXP1);
+                var_dump($va["sumexp2_".$key]);
+                var_dump($val->PROJS[$ka]->SUMAMOUNTEXP2);
+                var_dump($va["sumexp3_".$key]);
+                var_dump($val->PROJS[$ka]->SUMAMOUNTEXP3);
+                var_dump($va["sumexp4_".$key]);
+                var_dump($val->PROJS[$ka]->SUMAMOUNTEXP4);
+                var_dump($va["sumexp5_".$key]);
+                var_dump($val->PROJS[$ka]->SUMAMOUNTEXP5);
+                var_dump($va["sumall_".$key]);
+                var_dump($val->PROJS[$ka]->AMOUNT);
+                var_dump($va["indname_".$key]);
+                var_dump($va["indunit_".$key]);
+                var_dump($va["indgoal_".$key]);
+                var_dump($val->PROJS[$ka]->GOALKPIS);
+                $templateProcessor->setValue($va["projname_".$key], $val->PROJS[$ka]->PROJECTWORKNAME);
+                $templateProcessor->setValue($va["sumexp1_".$key], number_format($val->PROJS[$ka]->SUMAMOUNTEXP1));
+                $templateProcessor->setValue($va["sumexp2_".$key], number_format($val->PROJS[$ka]->SUMAMOUNTEXP2));
+                $templateProcessor->setValue($va["sumexp3_".$key], number_format($val->PROJS[$ka]->SUMAMOUNTEXP3));
+                $templateProcessor->setValue($va["sumexp4_".$key], number_format($val->PROJS[$ka]->SUMAMOUNTEXP4));
+                $templateProcessor->setValue($va["sumexp5_".$key], number_format($val->PROJS[$ka]->SUMAMOUNTEXP5));
+                $templateProcessor->setValue($va["sumall_".$key], number_format($val->PROJS[$ka]->AMOUNT));
+
+                $data = [];
+                foreach ($val->PROJS[$ka]->GOALKPIS as $kgp => $vkgp) {
+                    $szx = [ 
+                        $va["indname_".$key] => $vkgp->INDNAME,
+                        $va["indunit_".$key] => $vkgp->INDUNIT,
+                        $va["indgoal_".$key] => $vkgp->INDGOAL
+                    ];
+                    array_push($data, $szx);
+                }
+
+                var_dump($data);
+
+                foreach ($val->PROJS[$ka]->GOALKPIS as $data) {
+                    $templateProcessor->cloneRow($va["indname_".$key], $data);
+                }
+            }
+
+
+        }
+        
 
         // Save the merged Word document to a new file
         $outputFile = Storage::path('public/docx-out.docx');
