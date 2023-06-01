@@ -172,7 +172,7 @@ class WordsToPdf extends Controller
                     array_push($data, $szx);
                 }
 
-                var_dump($data);
+                var_dump("dddddddddddddddddddddddddddddddddddddddddddddddd",$data);
 
                 foreach ($val->PROJS[$ka]->GOALKPIS as $data) {
                     $templateProcessor->cloneRow($va["indname_".$key], $data);
@@ -184,8 +184,8 @@ class WordsToPdf extends Controller
         
 
         // Save the merged Word document to a new file
-        $outputFile = Storage::path('public/docx-out.docx');
-        $templateProcessor->saveAs($outputFile);
+        // $outputFile = Storage::path('public/docx-out.docx');
+        // $templateProcessor->saveAs($outputFile);
     }
 
     public function createContract(Request $req)
