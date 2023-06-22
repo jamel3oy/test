@@ -17,7 +17,7 @@ class AuthGateWay
      */
     public function handle($request, Closure $next)
     {
-        $procode = env('PROGCODE');
+        $procode = env('PROGRAM_CODE');
         $url = env('GATEWAY_USER_ENDPOINT');
         $params = array(
             'progcode' => $procode,
