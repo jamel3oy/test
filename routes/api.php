@@ -24,3 +24,7 @@ Route::post('sign', 'WordsToPdf@sign');
 
 Route::post('testloop', 'WordsToPdf@testLoop');
 Route::post('signx', 'SignPdf@sign');
+
+Route::get('getfacall', 'ReqBudgetCT@getFacultyAll');
+
+Route::get('getalldata', 'ReqBudgetCT@getReqBudget8900');
