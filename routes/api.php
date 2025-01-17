@@ -16,9 +16,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth.gateway')->get('/user', function (Request $request) {
-    //return Auth::user();
-    return $request->user();
+Route::middleware('nextauth')->group(function () {
+    // เอา Api Route มาไว้ในนี้
+    Route::get('/testx', function (Request $request) {
+        return response()->json($request->attributes->get('user'));
+    });
 });
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     $staffdepartment_default = DB::select("SELECT FD_FACNAME(?) AS STAFFDEPARTMENTNAME FROM DUAL", [$request->user()->staffdepartment]);
@@ -63,6 +65,10 @@ Route::post('sign', 'WordsToPdf@sign');
 Route::post('testloop', 'WordsToPdf@testLoop');
 Route::post('signx', 'SignPdf@sign');
 
+Route::get('test', 'TestCT@test');
+
+
+Route::get('create4tm', 'WordsToPdf@createWordFromTemplate');
 Route::get('getfacall', 'ReqBudgetCT@getFacultyAll');
 
 Route::get('getalldata', 'ReqBudgetCT@getReqBudget8900');
