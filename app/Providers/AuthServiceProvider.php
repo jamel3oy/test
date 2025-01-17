@@ -30,11 +30,11 @@ class AuthServiceProvider extends ServiceProvider
         Passport::routes();
         Passport::tokensExpireIn(now()->addDays(1));
         Passport::refreshTokensExpireIn(now()->addDays(30));
-        $scope = DB::connection("oracle")->table('mgn_program')->get();
-        $arr = [];
-        foreach ($scope as $value) {
-            $arr[$value->progcode] =  $value->progname;
-        }
-        Passport::tokensCan($arr);
+        // $scope = DB::connection("oracle")->table('mgn_program')->get();
+        // $arr = [];
+        // foreach ($scope as $value) {
+        //     $arr[$value->progcode] =  $value->progname;
+        // }
+        // Passport::tokensCan($arr);
     }
 }
