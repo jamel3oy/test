@@ -21,6 +21,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/showreport', function () {
+    return view('report');
+});
+
 Route::get('/getword', 'WordsToPdf@getWord');
 
 Route::get('/callback', 'AuthController@handleProviderCallback');
