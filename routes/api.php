@@ -14,8 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('nextauth')->group(function () {
+    // เอา Api Route มาไว้ในนี้
+    Route::get('/testx', function (Request $request) {
+        return response()->json($request->attributes->get('user'));
+    });
 });
 
 Route::post('createcontract', 'WordsToPdf@createContract');
@@ -24,3 +27,10 @@ Route::post('sign', 'WordsToPdf@sign');
 
 Route::post('testloop', 'WordsToPdf@testLoop');
 Route::post('signx', 'SignPdf@sign');
+
+Route::get('test', 'TestCT@test');
+
+
+Route::get('create4tm', 'WordsToPdf@createWordFromTemplate');
+
+

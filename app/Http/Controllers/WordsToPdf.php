@@ -264,4 +264,38 @@ class WordsToPdf extends Controller
         $pdf->Output($signed_pdf_file, 'F');
 
     }
+
+    public function createWordFromTemplate()
+    {
+        $data = [
+            'categories' => [
+                ['category_name' => 'Category 1', 'items' => ['Item 1', 'Item 2']],
+                ['category_name' => 'Category 2', 'items' => ['Item 3', 'Item 4']],
+            ],
+        ];
+        
+        // Load the Word template
+        $templateFile = Storage::path('public/xmltemplate.docx');
+        $templateProcessor = new TemplateProcessor($templateFile);
+        
+        // Iterate through categories
+        foreach ($data['categories'] as $category) {
+            // Add category name to the template
+            $templateProcessor->setValue('category_name', $category['category_name']);
+        
+            // Iterate through items
+            foreach ($category['items'] as $item) {
+                // Clone the paragraph containing the item name
+                $templateProcessor->cloneBlock('items', count($category['items']));
+        
+                // Add item name to the cloned paragraph
+                $templateProcessor->setValue('item_name', $item);
+            }
+        }
+        
+        // Save the populated Word document
+        //$templateProcessor->saveAs('output.docx');
+        $outputFile = Storage::path('public/output.docx');
+        $templateProcessor->saveAs($outputFile);
+    }
 }
